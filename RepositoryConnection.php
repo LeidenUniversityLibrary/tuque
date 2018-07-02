@@ -136,7 +136,17 @@ class RepositoryConnection extends CurlConnection implements RepositoryConfigInt
    * @see CurlConnection::getRequest()
    */
   public function getRequest($url, $headers_only = FALSE, $file = NULL) {
+    $url2response = &drupal_static(__METHOD__, array());
+
     try {
+      if ($file === NULL) {
+        $key = $headers_only?"$url header":$url;
+        if (!isset($url2response[$key])) {
+          $url2response[$key] = parent::getRequest($this->buildUrl($url), $headers_only, $file);
+        }
+        return $url2response[$key];
+      }
+
       return parent::getRequest($this->buildUrl($url), $headers_only, $file);
     }
     catch (HttpConnectionException $e) {
